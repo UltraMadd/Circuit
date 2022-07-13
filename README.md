@@ -1,4 +1,5 @@
 # Circuit
+[![circuit](https://i.imgur.com/pWA199T_d.webp?maxwidth=760&fidelity=grand)](https://github.com/UltraMadd/Circuit)
 
 #### About it
 Circuit is a python project analyzer to help keep your project clean and tidy.
