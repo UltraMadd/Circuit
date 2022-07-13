@@ -1,21 +1,29 @@
 """
 LoadFolders is a class that should create a list of files and folders for further processing
-AnalysisQueue is a class that is responsible for the sequence of analysis of folders and files
-StartAnalysis is a class that is responsible for the analysis and for the interaction of classes during the analysis
+ProcessingQueue is a class that is responsible for the sequence of processing of folders and files
+StartProcessing is a class that is responsible for the analysis and for the interaction of classes during the processing
 """
 
 
 import os
 from src.circuit.utils import is_a_long_name
+from dataclasses import dataclass
 
 
-class AnalysisQueue:
+@dataclass
+class FolderTreeBranch:
+    root: str
+    dirs: list
+    files: list
+
+
+class ProcessingQueue:
     """
-    This is a class that is responsible for the sequence of analysis of folders and files
+    This is a class that is responsible for the sequence of processing of folders and files
     """
-    def __init__(self):
+    def __init__(self, args):
         self._queue_folders = []
-        self.analysis_tool = StartAnalysis()
+        self.analysis_tool = StartProcessing(args)
 
     @property
     def folders_count(self):
@@ -33,17 +41,19 @@ class LoadFolders:
         self.path = path
 
     def start(self):
-        _folder = os.listdir()
-        current_path = os.getcwd()
-        file_stack = []
+        folder_tree = os.walk(self.path)
+        folder_tree_branches = []
 
-        for file in _folder:
-            if os.path.isdir(current_path):
-                pass
+        for root, dirs, files in folder_tree:
+            folder_tree_branches.append(
+                FolderTreeBranch(root, dirs, files)
+            )
+        print(folder_tree_branches)
 
-class StartAnalysis:
+
+class StartProcessing:
     """
-    This is a class that is responsible for the analysis and for the interaction of classes during the analysis
+    This is a class that is responsible for the analysis and for the interaction of classes during the processing
     """
     def __init__(self, args):
         self.args = args
