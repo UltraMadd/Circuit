@@ -29,3 +29,4 @@ def prepare(args: argparse.Namespace) -> bool:
 if __name__ == '__main__':
     if prepare(arguments):
         print(os.listdir())
+        circuit.analyzer.StartAnalysis(1).start()
