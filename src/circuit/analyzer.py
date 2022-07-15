@@ -5,15 +5,29 @@ StartProcessing is a class that is responsible for the analysis and for the inte
 """
 
 import os
-from typing import List
-from dataclasses import dataclass
 
+import colorama
+from colorama import Fore
+from typing import List, Union
+from dataclasses import dataclass
+from argparse import Namespace
+
+from .detections import DetectionTypes
+
+
+colorama.init()
 
 @dataclass
 class Detection:
+    """
     detection_id: str
     detection_path: str
     detection_line: int = 0
+    """
+    detection_id: str
+    detection_path: str
+    detection_line: int = 0
+    path_addon: Union[str, None] = None
 
     """
      Style # return                                              
@@ -25,23 +39,25 @@ class Detection:
      Dir   # C<id><type> in <path>: <desc>                       
      ------------------------------------------------------------
     """
-    def to_str(self, style: str, detection_type: str = "W") -> str:
+    def to_str(self, detection_type: str = "W") -> str:
         """
         Converts detection to str
         :param detection_type:
-        :param style:
         :return:
         """
+
+        # Return style ^ Look on table ^
+        style = "Full"
+
+        # Detection short name " C<ID><type> "
         detection_shortname = f"C{self.detection_id}{detection_type}"
-        detection_desc = ''   # Detection description
+
+        # Detection description
+        detection_desc = DetectionTypes.descriptions[self.detection_id]
+
         if style == 'Full':
-            return f"{detection_shortname} in {self.detection_path} on " \
-                   f"{self.detection_line} {detection_desc}"
-
-
-@dataclass
-class Detections:
-    pass
+            return f"{Fore.YELLOW}{detection_shortname}{Fore.WHITE} in {self.detection_path}{self.path_addon if self.path_addon else ''} on " \
+                   f"{self.detection_line}: {Fore.YELLOW}{detection_desc}{Fore.WHITE}"
 
 
 @dataclass
@@ -53,22 +69,11 @@ class FolderTreeBranch:
     def is_empty_dir(self):
         return not (self.files or self.dirs)
 
-
-class ProcessingQueue:
-    """
-    This is a class that is responsible for the sequence of processing of folders and files
-    """
-
-    def __init__(self, args) -> None:
-        self._queue_folders = []
-        self.analysis_tool = StartProcessing(args)
-
-    @property
-    def folders_count(self):
-        return len(self._queue_folders)
-
-    def analyze_latest(self):
-        return
+    def extract_too_long(self):
+        return (
+            list(filter(lambda name: len(name) > 75, self.dirs)),
+            list(filter(lambda name: len(name) > 75, self.files))
+        )
 
 
 class LoadFolders:
@@ -98,13 +103,27 @@ class StartProcessing:
     :param folder_tree:
     """
 
-    def __init__(self, args: 'Namespace',
+    def __init__(self, args: Namespace,
                  folder_tree: List[FolderTreeBranch]):
 
-        self.args = args
-        self.folder_tree = folder_tree
+        self.args: Namespace = args
+        self.folder_tree: List[FolderTreeBranch] = folder_tree
+        self.detections: List[Detection] = []
 
-    def start(self):
+    def check_branch(self, branch: FolderTreeBranch) -> None:
+        folders_with_long_name, files_with_long_name = branch.extract_too_long()
+        if folders_with_long_name:
+            for folder in folders_with_long_name:
+                self.detections.append(Detection('0003', branch.root + folder))
+            del folders_with_long_name
+        if files_with_long_name:
+            for file in files_with_long_name:
+                self.detections.append(Detection('0004', branch.root + file))
+            del files_with_long_name
+        if branch.is_empty_dir():
+            self.detections.append(Detection('0005', branch.root))
+
+    def start(self) -> List[Detection]:
         for branch in self.folder_tree:
-            if branch.is_empty_dir():
-                pass
+            self.check_branch(branch)
+        return self.detections
