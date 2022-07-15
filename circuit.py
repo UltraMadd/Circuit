@@ -9,7 +9,7 @@ parser.add_argument("-patch", dest="patch")
 arguments = parser.parse_args()
 
 
-def prepare(args: argparse.Namespace) -> bool:
+def prepare(args: argparse.Namespace) -> bool and dict:
     """
     Prepare for analyze
     :param args: argparse.Namespace
@@ -20,12 +20,13 @@ def prepare(args: argparse.Namespace) -> bool:
 
     os.chdir(args.path)   # Moving to analyze path
 
-    if not os.listdir():
-        return False
-    return True
+    return bool(os.listdir())
 
 
 if __name__ == '__main__':
     if prepare(arguments):
         print(os.listdir())
-        circuit.analyzer.LoadFolders(arguments.path).start()
+        a = circuit.analyzer.LoadFolders(arguments.path).start()
+        for i in a:
+            if i.is_empty_dir():
+                print("Empty dir", i)
