@@ -16,17 +16,17 @@ def prepare(args: argparse.Namespace) -> bool and dict:
     :return: bool do program need an analysis or path is empty
     """
     if not os.path.exists(args.path):
-        raise OSError(f"Path {args.path} doesn't exists")
+        raise OSError(f"Path {args.path} doesn't exists. -path param should be the path to your project")
 
-    os.chdir(args.path)   # Moving to analyze path
+    # Moving to analyze path
+    os.chdir(args.path)
 
     return bool(os.listdir())
 
 
 if __name__ == '__main__':
     if prepare(arguments):
-        print(os.listdir())
-        a = circuit.analyzer.LoadFolders(arguments.path).start()
+        folder_tree = circuit.analyzer.LoadFolders(arguments.path).start()
+        a = circuit.analyzer.StartProcessing(arguments, folder_tree).start()
         for i in a:
-            if i.is_empty_dir():
-                print("Empty dir", i)
+            print(i.to_str())
