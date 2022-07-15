@@ -1,5 +1,6 @@
 # Circuit
 [![circuit](https://i.imgur.com/YYMn5Gt_d.webp?maxwidth=760&fidelity=grand)](https://github.com/UltraMadd/Circuit)
+[![GitHub](https://img.shields.io/github/license/UltraMadd/circuit?color=blue)](https://en.wikipedia.org/wiki/MIT_License)
 
 #### About it
 Circuit is a python project analyzer to help keep your project clean and tidy.
